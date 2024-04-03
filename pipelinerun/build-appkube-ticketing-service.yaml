@@ -72,7 +72,7 @@ spec:
   - name: build-maven
     runAfter: ["fetch-repo"]
     taskRef:
-      name: test-build-maven
+      name: ticketing-build-maven
     workspaces:
     - name: source
       workspace: shared-data
