@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: test-build-maven
+  name: ticketing-build-maven
   namespace: tekton-pipelines
 spec:
   workspaces:
