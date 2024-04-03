@@ -21,13 +21,13 @@ spec:
   params:
   - name: repo-url
     type: string
-    description: ticketing source repo - https://github.com/AppkubeCloud/appkube-ticketing-service.git
+    description: ticketing source repo - https://github.com/xformation/Ticketing-Service-API.git
   - name: repo-revision
     type: string
     description: service revision to checkout. (branch, tag, sha, ref, etc...)
   - name: deploy-repo-url
     type: string
-    description: deployment repo for CMDB service - https://github.com/AppkubeCloud/appkube-cmdb-deployment
+    description: deployment repo for ticketing service - https://github.com/xformation/ticketing-service-api-deployment.git
   - name: helm-workingDir-param
     type: string
     description: working directory for helm execution
@@ -40,6 +40,9 @@ spec:
   - name: helm-release-namespace-param
     type: string
     description: namespace for service installation
+  - name: dockerhub-repo-service
+    type: string
+    description: repo to upload service container example - synectiks/appkube-ticketing-service
   workspaces:
   - name: shared-data
     description: |
@@ -76,63 +79,63 @@ spec:
     params:
     - name: workingDir
       value: $(workspaces.source.path)
-  # - name: build-kaniko
-  #   runAfter: ["build-maven"]
-  #   taskRef:
-  #     name: build-kaniko
-  #   workspaces:
-  #   - name: source
-  #     workspace: shared-data
-  #   - name: dockerconfig
-  #     workspace: dockerconfig-secret
-  #   params:
-  #   - name: IMAGE
-  #     value: synectiks/appkube-ticketing-service:$(tasks.fetch-repo.results.commit)
-  #   - name: IMAGE2
-  #     value: synectiks/appkube-ticketing-service:latest
-  #   - name: DOCKERFILE
-  #     value: $(workspaces.source.path)/Dockerfile
-  #   - name: CONTEXT
-  #     value: ./
-  # - name: fetch-cmdb-deploy-repo
-  #   taskRef:
-  #     name: git-clone
-  #   workspaces:
-  #   - name: output
-  #     workspace: shared-data1
-  #   params:
-  #   - name: url
-  #     value: $(params.cmdb-deploy-repo-url)
-  #   - name: revision
-  #     value: "0.1" 
-  # - name: service-deploy-with-helm
-  #   runAfter: ["fetch-cmdb-deploy-repo", "build-kaniko"]
-  #   taskRef:
-  #     name: helm-appkube-cmdb-install
-  #   params:
-  #   - name: workingDir
-  #     value: $(params.helm-workingDir-param)
-  #   - name: release_version
-  #     value: $(params.helm-release-version-param)
-  #   - name: release_name
-  #     value: $(params.helm-release-name-param)
-  #   - name: release_namespace
-  #     value: $(params.helm-release-namespace-param)
-  #   - name: overwrite_values
-  #     value: image.tag=$(tasks.fetch-repo.results.commit)
-  #   workspaces:
-  #   - name: source
-  #     workspace: shared-data1
-  #   - name: secrets
-  #     workspace: aws-secrets
-  # finally:
-  #   - name: cleanup-on-success
-  #     when:
-  #     - input: $(tasks.status)
-  #       operator: in
-  #       values: ["Succeeded"]
-  #     taskRef:
-  #       name: cleanup-on-success
+  - name: build-kaniko
+    runAfter: ["build-maven"]
+    taskRef:
+      name: build-kaniko
+    workspaces:
+    - name: source
+      workspace: shared-data
+    - name: dockerconfig
+      workspace: dockerconfig-secret
+    params:
+    - name: IMAGE
+      value: $(dockerhub-repo-service):$(tasks.fetch-repo.results.commit)
+    - name: IMAGE2
+      value: $(dockerhub-repo-service):latest
+    - name: DOCKERFILE
+      value: $(workspaces.source.path)/Dockerfile
+    - name: CONTEXT
+      value: ./
+  - name: fetch-ticketing-deploy-repo
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-data1
+    params:
+    - name: url
+      value: $(params.deploy-repo-url)
+    - name: revision
+      value: "0.1" 
+  - name: service-deploy-with-helm
+    runAfter: ["fetch-ticketing-deploy-repo", "build-kaniko"]
+    taskRef:
+      name: helm-appkube-ticket-install
+    params:
+    - name: workingDir
+      value: $(params.helm-workingDir-param)
+    - name: release_version
+      value: $(params.helm-release-version-param)
+    - name: release_name
+      value: $(params.helm-release-name-param)
+    - name: release_namespace
+      value: $(params.helm-release-namespace-param)
+    - name: overwrite_values
+      value: image.tag=$(tasks.fetch-repo.results.commit)
+    workspaces:
+    - name: source
+      workspace: shared-data1
+    - name: secrets
+      workspace: aws-secrets
+  finally:
+    - name: cleanup-on-success
+      when:
+      - input: $(tasks.status)
+        operator: in
+        values: ["Succeeded"]
+      taskRef:
+        name: cleanup-on-success
 ---
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
@@ -180,3 +183,5 @@ spec:
     value: appkube-ticketing-service
   - name: helm-workingDir-param
     value: $(workspaces.source.path)
+  - name: dockerhub-repo-service
+    value: synectiks/appkube-ticketing-service
