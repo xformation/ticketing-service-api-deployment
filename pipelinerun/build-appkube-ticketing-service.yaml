@@ -90,9 +90,9 @@ spec:
       workspace: dockerconfig-secret
     params:
     - name: IMAGE
-      value: $(dockerhub-repo-service):$(tasks.fetch-repo.results.commit)
+      value: $(params.dockerhub-repo-service):$(tasks.fetch-repo.results.commit)
     - name: IMAGE2
-      value: $(dockerhub-repo-service):latest
+      value: $(params.dockerhub-repo-service):latest
     - name: DOCKERFILE
       value: $(workspaces.source.path)/Dockerfile
     - name: CONTEXT
@@ -106,36 +106,36 @@ spec:
     params:
     - name: url
       value: $(params.deploy-repo-url)
-    - name: revision
-      value: "0.1" 
-  - name: service-deploy-with-helm
-    runAfter: ["fetch-ticketing-deploy-repo", "build-kaniko"]
-    taskRef:
-      name: helm-appkube-ticket-install
-    params:
-    - name: workingDir
-      value: $(params.helm-workingDir-param)
-    - name: release_version
-      value: $(params.helm-release-version-param)
-    - name: release_name
-      value: $(params.helm-release-name-param)
-    - name: release_namespace
-      value: $(params.helm-release-namespace-param)
-    - name: overwrite_values
-      value: image.tag=$(tasks.fetch-repo.results.commit)
-    workspaces:
-    - name: source
-      workspace: shared-data1
-    - name: secrets
-      workspace: aws-secrets
-  finally:
-    - name: cleanup-on-success
-      when:
-      - input: $(tasks.status)
-        operator: in
-        values: ["Succeeded"]
-      taskRef:
-        name: cleanup-on-success
+    # - name: revision
+    #   value: "0.1" 
+  # - name: service-deploy-with-helm
+  #   runAfter: ["fetch-ticketing-deploy-repo", "build-kaniko"]
+  #   taskRef:
+  #     name: helm-appkube-ticketing-install
+  #   params:
+  #   - name: workingDir
+  #     value: $(params.helm-workingDir-param)
+  #   - name: release_version
+  #     value: $(params.helm-release-version-param)
+  #   - name: release_name
+  #     value: $(params.helm-release-name-param)
+  #   - name: release_namespace
+  #     value: $(params.helm-release-namespace-param)
+  #   - name: overwrite_values
+  #     value: image.tag=$(tasks.fetch-repo.results.commit)
+  #   workspaces:
+  #   - name: source
+  #     workspace: shared-data1
+  #   - name: secrets
+  #     workspace: aws-secrets
+  # finally:
+  #   - name: cleanup-on-success
+  #     when:
+  #     - input: $(tasks.status)
+  #       operator: in
+  #       values: ["Succeeded"]
+  #     taskRef:
+  #       name: cleanup-on-success
 ---
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
