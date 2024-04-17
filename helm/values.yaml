@@ -11,9 +11,8 @@ image:
   tag: "latest"
 
 imagePullSecrets: []
-nameOverride: "true"
-fullnameOverride: true
-
+nameOverride: ""
+fullnameOverride: "appkube-ticketing"
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -23,7 +22,7 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  name: "appkube-ticketing-acc"
 
 podAnnotations: {}
 podLabels: {}
@@ -113,13 +112,7 @@ virtualservice:
   hosts: "api.synectiks.net"
   gateway: "appkube-api-gateway"
   http:
-  - match:
-    - uri:
-      prefix: "/ticketing"
-    rewrite:
-      uri: /
-    route:
-    - destination:
-        host: appkube-ticketing-service.appkube-awsx-api-service.svc.cluster.local
-        port:
-          number: 7100
+    prefix: "/ticketing"
+    uri: /
+    destination:
+      host: appkube-ticketing.appkube-ticketing-service.svc.cluster.local

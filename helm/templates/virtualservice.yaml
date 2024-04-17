@@ -12,12 +12,12 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /{{ .Chart.Name }}
+        prefix: {{ .Values.virtualservice.http.prefix }}
     rewrite:
-      uri: /{{ .Chart.Name }}
+      uri: {{ .Values.virtualservice.http.uri }}
     route:
     - destination:
-        host: {{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local
+        host: {{ .Values.virtualservice.http.destination.host }}
         port:
           number: {{ .Values.service.port }}
   {{ end }}
