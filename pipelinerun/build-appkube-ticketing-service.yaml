@@ -108,34 +108,34 @@ spec:
       value: $(params.deploy-repo-url)
     # - name: revision
     #   value: "0.1" 
-  # - name: service-deploy-with-helm
-  #   runAfter: ["fetch-ticketing-deploy-repo", "build-kaniko"]
-  #   taskRef:
-  #     name: helm-appkube-ticketing-install
-  #   params:
-  #   - name: workingDir
-  #     value: $(params.helm-workingDir-param)
-  #   - name: release_version
-  #     value: $(params.helm-release-version-param)
-  #   - name: release_name
-  #     value: $(params.helm-release-name-param)
-  #   - name: release_namespace
-  #     value: $(params.helm-release-namespace-param)
-  #   - name: overwrite_values
-  #     value: image.tag=$(tasks.fetch-repo.results.commit)
-  #   workspaces:
-  #   - name: source
-  #     workspace: shared-data1
-  #   - name: secrets
-  #     workspace: aws-secrets
-  # finally:
-  #   - name: cleanup-on-success
-  #     when:
-  #     - input: $(tasks.status)
-  #       operator: in
-  #       values: ["Succeeded"]
-  #     taskRef:
-  #       name: cleanup-on-success
+  - name: service-deploy-with-helm
+    runAfter: ["fetch-ticketing-deploy-repo", "build-kaniko"]
+    taskRef:
+      name: helm-appkube-ticketing-install
+    params:
+    - name: workingDir
+      value: $(params.helm-workingDir-param)
+    - name: release_version
+      value: $(params.helm-release-version-param)
+    - name: release_name
+      value: $(params.helm-release-name-param)
+    - name: release_namespace
+      value: $(params.helm-release-namespace-param)
+    - name: overwrite_values
+      value: image.tag=$(tasks.fetch-repo.results.commit)
+    workspaces:
+    - name: source
+      workspace: shared-data1
+    - name: secrets
+      workspace: aws-secrets
+  finally:
+    - name: cleanup-on-success
+      when:
+      - input: $(tasks.status)
+        operator: in
+        values: ["Succeeded"]
+      taskRef:
+        name: cleanup-on-success
 ---
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
@@ -178,7 +178,7 @@ spec:
   - name: helm-release-version-param
     value: 0.1.0
   - name: helm-release-name-param
-    value: appkube-ticketing-service
+    value: appkube-ticketing
   - name: helm-release-namespace-param
     value: appkube-ticketing-service
   - name: helm-workingDir-param
